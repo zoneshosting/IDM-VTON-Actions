@@ -511,7 +511,7 @@
         </div>
     </div>
 
-    <script src="github-actions-api.js"></script>
+    <script src="huggingface-direct.js"></script>
     <script>
         let currentWorkflowId = null;
         let enhancedTryOn = null;
@@ -701,7 +701,14 @@
                 
                 // Show results
                 displayResults(result);
-                showAlert('Virtual try-on completed successfully!', 'success');
+                
+                if (result.metadata && result.metadata.processing === 'Direct Hugging Face API') {
+                    showAlert('Virtual try-on completed using Hugging Face IDM-VTON model!', 'success');
+                } else if (result.metadata && result.metadata.processing === 'Hugging Face Fallback') {
+                    showAlert('Virtual try-on completed using fallback processing.', 'info');
+                } else {
+                    showAlert('Virtual try-on completed successfully!', 'success');
+                }
                 
             } catch (error) {
                 console.error('Virtual try-on error:', error);
