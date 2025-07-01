@@ -511,7 +511,7 @@
         </div>
     </div>
 
-    <script src="huggingface-direct.js"></script>
+    <script src="huggingface-working.js"></script>
     <script>
         let currentWorkflowId = null;
         let enhancedTryOn = null;
@@ -702,12 +702,12 @@
                 // Show results
                 displayResults(result);
                 
-                if (result.metadata && result.metadata.processing === 'Direct Hugging Face API') {
-                    showAlert('Virtual try-on completed using Hugging Face IDM-VTON model!', 'success');
-                } else if (result.metadata && result.metadata.processing === 'Hugging Face Fallback') {
-                    showAlert('Virtual try-on completed using fallback processing.', 'info');
+                if (result.metadata && result.metadata.processing === 'Manual Hugging Face Space') {
+                    showAlert('Hugging Face Space opened! Follow the instructions to process with real IDM-VTON.', 'info');
+                } else if (result.metadata && result.metadata.processing === 'Demo Preview') {
+                    showAlert('Demo preview shown. For real results, use the Hugging Face Space directly.', 'info');
                 } else {
-                    showAlert('Virtual try-on completed successfully!', 'success');
+                    showAlert('Virtual try-on completed!', 'success');
                 }
                 
             } catch (error) {
