@@ -126,11 +126,22 @@
             cursor: pointer;
             font-size: 1rem;
             transition: all 0.3s ease;
+            margin: 5px;
         }
 
         .upload-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .example-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .preview-container {
@@ -188,6 +199,11 @@
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group input.loaded {
+            border-color: #00b894;
+            background-color: #f0fff4;
         }
 
         .parameters-section {
@@ -344,7 +360,7 @@
         <div class="instructions">
             <h3><i class="fas fa-info-circle"></i> How to Use</h3>
             <ol>
-                <li><strong>Upload or provide URLs</strong> for a person image and garment image</li>
+                <li><strong>Click "Load Example Images"</strong> or provide your own image URLs</li>
                 <li><strong>Adjust parameters</strong> for quality and processing preferences</li>
                 <li><strong>Click "Run Virtual Try-On"</strong> to start the GitHub Actions workflow</li>
                 <li><strong>Wait 15-20 minutes</strong> for processing to complete</li>
@@ -358,7 +374,7 @@
                 <p>Choose your person and garment images</p>
             </div>
             <div class="card-body">
-                <button class="upload-btn" onclick="loadExample()" style="margin-bottom: 20px;">
+                <button class="upload-btn example-btn" id="exampleBtn">
                     <i class="fas fa-magic"></i> Load Example Images
                 </button>
 
@@ -427,7 +443,7 @@
                     </div>
                 </div>
 
-                <button class="run-button" id="runButton" onclick="runVirtualTryOn()">
+                <button class="run-button" id="runButton">
                     <i class="fas fa-play"></i> Run Virtual Try-On
                 </button>
             </div>
@@ -446,9 +462,56 @@
     </div>
 
     <script>
+        console.log('JavaScript loaded successfully');
+
         // GitHub repository configuration
         const GITHUB_OWNER = 'zoneshosting';
         const GITHUB_REPO = 'IDM-VTON-Actions';
+
+        // Status display function
+        function showStatus(type, message) {
+            console.log('Showing status:', type, message);
+            const statusSection = document.getElementById('statusSection');
+            const statusContent = document.getElementById('statusContent');
+            
+            if (statusSection && statusContent) {
+                statusSection.className = `status-section show ${type}`;
+                statusContent.innerHTML = message;
+                
+                if (type === 'info') {
+                    setTimeout(() => {
+                        statusSection.classList.remove('show');
+                    }, 5000);
+                }
+            }
+        }
+
+        // Load example URLs function
+        function loadExample() {
+            console.log('loadExample function called');
+            try {
+                const personUrlInput = document.getElementById('personUrl');
+                const garmentUrlInput = document.getElementById('garmentUrl');
+                
+                if (personUrlInput && garmentUrlInput) {
+                    personUrlInput.value = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/human/00013_00.jpg';
+                    garmentUrlInput.value = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/cloth/00034_00.jpg';
+                    
+                    // Add visual feedback
+                    personUrlInput.classList.add('loaded');
+                    garmentUrlInput.classList.add('loaded');
+                    
+                    showStatus('success', '✅ Example URLs loaded successfully! You can now run the virtual try-on.');
+                    console.log('Example URLs loaded successfully');
+                } else {
+                    console.error('Could not find URL input elements');
+                    showStatus('error', 'Error loading example URLs. Please try refreshing the page.');
+                }
+            } catch (error) {
+                console.error('Error in loadExample:', error);
+                showStatus('error', 'Error loading example URLs: ' + error.message);
+            }
+        }
 
         // File upload handling
         function setupFileUpload(fileInputId, previewId, previewImgId) {
@@ -456,19 +519,21 @@
             const preview = document.getElementById(previewId);
             const previewImg = document.getElementById(previewImgId);
 
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImg.src = e.target.result;
-                        preview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                    
-                    showStatus('info', 'File selected! Please upload this image to a hosting service (like GitHub, Imgur, or Google Drive) and paste the URL in the URL field below.');
-                }
-            });
+            if (fileInput && preview && previewImg) {
+                fileInput.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImg.src = e.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                        
+                        showStatus('info', 'File selected! Please upload this image to a hosting service (like GitHub, Imgur, or Google Drive) and paste the URL in the URL field below.');
+                    }
+                });
+            }
         }
 
         // Setup drag and drop
@@ -476,57 +541,32 @@
             const uploadBox = document.getElementById(uploadBoxId);
             const fileInput = document.getElementById(fileInputId);
 
-            uploadBox.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                uploadBox.classList.add('dragover');
-            });
+            if (uploadBox && fileInput) {
+                uploadBox.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    uploadBox.classList.add('dragover');
+                });
 
-            uploadBox.addEventListener('dragleave', function(e) {
-                e.preventDefault();
-                uploadBox.classList.remove('dragover');
-            });
+                uploadBox.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    uploadBox.classList.remove('dragover');
+                });
 
-            uploadBox.addEventListener('drop', function(e) {
-                e.preventDefault();
-                uploadBox.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    fileInput.files = files;
-                    fileInput.dispatchEvent(new Event('change'));
-                }
-            });
-        }
-
-        // Initialize file uploads
-        setupFileUpload('personFile', 'personPreview', 'personImg');
-        setupFileUpload('garmentFile', 'garmentPreview', 'garmentImg');
-        setupDragAndDrop('personUpload', 'personFile');
-        setupDragAndDrop('garmentUpload', 'garmentFile');
-
-        // Status display
-        function showStatus(type, message) {
-            const statusSection = document.getElementById('statusSection');
-            const statusContent = document.getElementById('statusContent');
-            
-            statusSection.className = `status-section show ${type}`;
-            statusContent.innerHTML = message;
-            
-            if (type === 'info') {
-                setTimeout(() => {
-                    statusSection.classList.remove('show');
-                }, 5000);
+                uploadBox.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadBox.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                });
             }
         }
 
-        // Load example URLs
-        function loadExample() {
-            document.getElementById('personUrl').value = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/human/00013_00.jpg';
-            document.getElementById('garmentUrl').value = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/cloth/00034_00.jpg';
-            showStatus('info', 'Example URLs loaded! You can now run the virtual try-on.');
-        }
-
         // Main function to run virtual try-on
-        async function runVirtualTryOn() {
+        function runVirtualTryOn() {
+            console.log('runVirtualTryOn called');
             const personUrl = document.getElementById('personUrl').value.trim();
             const garmentUrl = document.getElementById('garmentUrl').value.trim();
             const category = document.getElementById('category').value;
@@ -536,7 +576,7 @@
 
             // Validation
             if (!personUrl || !garmentUrl) {
-                showStatus('error', 'Please provide both person and garment image URLs. You can upload files to GitHub, Imgur, or Google Drive to get URLs.');
+                showStatus('error', 'Please provide both person and garment image URLs. You can click "Load Example Images" to get started.');
                 return;
             }
 
@@ -601,6 +641,45 @@
                 return false;
             }
         }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Set up event listeners
+            const exampleBtn = document.getElementById('exampleBtn');
+            const runButton = document.getElementById('runButton');
+            
+            if (exampleBtn) {
+                exampleBtn.addEventListener('click', loadExample);
+                console.log('Example button event listener added');
+            } else {
+                console.error('Example button not found');
+            }
+            
+            if (runButton) {
+                runButton.addEventListener('click', runVirtualTryOn);
+                console.log('Run button event listener added');
+            } else {
+                console.error('Run button not found');
+            }
+
+            // Initialize file uploads
+            setupFileUpload('personFile', 'personPreview', 'personImg');
+            setupFileUpload('garmentFile', 'garmentPreview', 'garmentImg');
+            setupDragAndDrop('personUpload', 'personFile');
+            setupDragAndDrop('garmentUpload', 'garmentFile');
+            
+            console.log('Initialization complete');
+            
+            // Test the load example function
+            setTimeout(() => {
+                console.log('Testing if elements exist:');
+                console.log('personUrl element:', document.getElementById('personUrl'));
+                console.log('garmentUrl element:', document.getElementById('garmentUrl'));
+                console.log('exampleBtn element:', document.getElementById('exampleBtn'));
+            }, 1000);
+        });
     </script>
 </body>
 </html>
