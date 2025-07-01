@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 echo.
 echo ===============================================
 echo     IDM-VTON Complete Setup Script
@@ -20,12 +21,12 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo ✓ Git is installed
+echo [OK] Git is installed
 echo.
 
 :: Check if this is already a Git repository
 if exist ".git" (
-    echo ✓ Git repository already initialized
+    echo [OK] Git repository already initialized
     goto :configure_git
 )
 
@@ -37,7 +38,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo ✓ Git repository initialized
+echo [OK] Git repository initialized
 echo.
 
 :configure_git
@@ -59,7 +60,7 @@ if %errorlevel% neq 0 (
     git config --global user.email "%email%"
 )
 
-echo ✓ Git configuration complete
+echo [OK] Git configuration complete
 echo   User: 
 git config user.name
 echo   Email: 
@@ -72,9 +73,9 @@ git remote get-url origin > nul 2>&1
 if %errorlevel% neq 0 (
     echo Adding remote repository...
     git remote add origin https://github.com/zoneshosting/IDM-VTON-Actions.git
-    echo ✓ Remote repository added
+    echo [OK] Remote repository added
 ) else (
-    echo ✓ Remote repository already configured:
+    echo [OK] Remote repository already configured:
     git remote get-url origin
 )
 echo.
@@ -87,7 +88,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo ✓ Files added successfully
+echo [OK] Files added successfully
 echo.
 
 :: Check if there's already a commit
@@ -95,32 +96,19 @@ git log --oneline -1 > nul 2>&1
 if %errorlevel% neq 0 (
     :: First commit
     echo [5/6] Creating initial commit...
-    git commit -m "feat: initial commit - IDM-VTON GitHub Actions with frontend
-
-- Complete GitHub Actions workflow for virtual try-on
-- Beautiful responsive web interface with modern design
-- All files use LF line endings for cross-platform compatibility
-- Comprehensive documentation and troubleshooting guides
-- Professional repository structure with templates
-- Ready for cloud-based virtual try-on processing"
+    git commit -m "feat: initial commit - IDM-VTON GitHub Actions with frontend"
 ) else (
     :: Additional commit
     echo [5/6] Creating commit for new changes...
-    git commit -m "feat: add beautiful frontend web UI for virtual try-on
-
-- Create responsive web interface with modern design
-- Add drag-and-drop image upload functionality
-- Integrate GitHub Actions workflow triggering
-- Include mobile-friendly responsive layout
-- Add GitHub Pages deployment workflow
-- Update documentation with frontend features"
+    git commit -m "feat: add beautiful frontend web UI for virtual try-on"
 )
 
 if %errorlevel% neq 0 (
     echo WARNING: Commit failed. This might be because there are no changes to commit.
     echo Continuing with push anyway...
+) else (
+    echo [OK] Changes committed
 )
-echo ✓ Changes committed
 echo.
 
 :: Push to GitHub
@@ -129,19 +117,19 @@ git branch -M main
 git push -u origin main
 if %errorlevel% neq 0 (
     echo.
-    echo ⚠️  PUSH FAILED - This is usually due to one of these reasons:
+    echo [ERROR] PUSH FAILED - This is usually due to one of these reasons:
     echo.
-    echo 1. 🔐 Authentication required:
-    echo    • You may need to enter your GitHub username and password
-    echo    • Or set up a Personal Access Token
+    echo 1. Authentication required:
+    echo    You may need to enter your GitHub username and password
+    echo    Or set up a Personal Access Token
     echo.
-    echo 2. 🏗️  Repository doesn't exist yet:
-    echo    • Go to: https://github.com/new
-    echo    • Create a repository named: IDM-VTON-Actions
-    echo    • Make it PUBLIC for free GitHub Pages
-    echo    • Don't initialize with README (we have files already)
+    echo 2. Repository doesn't exist yet:
+    echo    Go to: https://github.com/new
+    echo    Create a repository named: IDM-VTON-Actions
+    echo    Make it PUBLIC for free GitHub Pages
+    echo    Don't initialize with README (we have files already)
     echo.
-    echo 3. 📡 Network connection issues
+    echo 3. Network connection issues
     echo.
     echo Press any key to open GitHub to create repository...
     pause > nul
@@ -154,36 +142,36 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo ✓ Successfully pushed to GitHub!
+echo [OK] Successfully pushed to GitHub!
 echo.
 
 :: Success message
 echo ===============================================
-echo            SETUP COMPLETE! 🎉
+echo            SETUP COMPLETE!
 echo ===============================================
 echo.
-echo ✅ Git repository initialized and configured
-echo ✅ All files committed to Git
-echo ✅ Code pushed to GitHub successfully
-echo ✅ GitHub Pages will automatically build your site
+echo [OK] Git repository initialized and configured
+echo [OK] All files committed to Git
+echo [OK] Code pushed to GitHub successfully
+echo [OK] GitHub Pages will automatically build your site
 echo.
 echo Your web interface will be live in 2-3 minutes at:
-echo    🌐 https://zoneshosting.github.io/IDM-VTON-Actions
+echo    https://zoneshosting.github.io/IDM-VTON-Actions
 echo.
 echo ===============================================
 echo                 NEXT STEPS
 echo ===============================================
 echo.
-echo 1. 🔧 Enable GitHub Pages:
-echo    • Go to: https://github.com/zoneshosting/IDM-VTON-Actions/settings/pages
-echo    • Under "Source", select "GitHub Actions"
-echo    • Click "Save"
+echo 1. Enable GitHub Pages:
+echo    Go to: https://github.com/zoneshosting/IDM-VTON-Actions/settings/pages
+echo    Under "Source", select "GitHub Actions"
+echo    Click "Save"
 echo.
-echo 2. ⏳ Wait 2-3 minutes for deployment
+echo 2. Wait 2-3 minutes for deployment
 echo.
-echo 3. 🌐 Visit: https://zoneshosting.github.io/IDM-VTON-Actions
+echo 3. Visit: https://zoneshosting.github.io/IDM-VTON-Actions
 echo.
-echo 4. 🎯 Test virtual try-on with example images!
+echo 4. Test virtual try-on with example images!
 echo.
 echo ===============================================
 echo.
@@ -200,7 +188,7 @@ echo Press any key to continue...
 pause > nul
 
 echo.
-echo 🎉 Setup complete! Your virtual try-on system is ready!
+echo Setup complete! Your virtual try-on system is ready!
 echo.
 echo For future updates, just run: deploy-frontend.bat
 echo.

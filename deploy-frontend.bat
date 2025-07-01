@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 echo.
 echo ===============================================
 echo   IDM-VTON Frontend Deployment Script
@@ -38,27 +39,19 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo ✓ Files added successfully
+echo [OK] Files added successfully
 echo.
 
 :: Commit changes
 echo [4/5] Committing changes...
-git commit -m "feat: add beautiful frontend web UI for virtual try-on
-
-- Create responsive web interface with modern design
-- Add drag-and-drop image upload functionality  
-- Integrate GitHub Actions workflow triggering
-- Include mobile-friendly responsive layout
-- Add GitHub Pages deployment workflow
-- Update documentation with frontend features
-- Provide example images and parameter guidance"
+git commit -m "feat: add beautiful frontend web UI for virtual try-on"
 
 if %errorlevel% neq 0 (
     echo WARNING: Commit failed. This might be because there are no changes to commit.
     echo Continuing with push anyway...
+) else (
+    echo [OK] Changes committed
 )
-
-echo ✓ Changes committed
 echo.
 
 :: Push to GitHub
@@ -71,40 +64,40 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo ✓ Successfully pushed to GitHub!
+echo [OK] Successfully pushed to GitHub!
 echo.
 
 :: Success message
 echo ===============================================
-echo            DEPLOYMENT SUCCESSFUL! 🎉
+echo            DEPLOYMENT SUCCESSFUL!
 echo ===============================================
 echo.
-echo ✅ Frontend files have been deployed to GitHub
-echo ✅ GitHub Pages will automatically build your site
-echo ✅ Your web interface will be live in 2-3 minutes at:
+echo [OK] Frontend files have been deployed to GitHub
+echo [OK] GitHub Pages will automatically build your site
+echo [OK] Your web interface will be live in 2-3 minutes at:
 echo.
-echo    🌐 https://zoneshosting.github.io/IDM-VTON-Actions
+echo    https://zoneshosting.github.io/IDM-VTON-Actions
 echo.
 echo ===============================================
 echo                 NEXT STEPS
 echo ===============================================
 echo.
-echo 1. 🔧 Enable GitHub Pages (if not already enabled):
-echo    • Go to: https://github.com/zoneshosting/IDM-VTON-Actions/settings/pages
-echo    • Under "Source", select "GitHub Actions"
-echo    • Click "Save"
+echo 1. Enable GitHub Pages (if not already enabled):
+echo    Go to: https://github.com/zoneshosting/IDM-VTON-Actions/settings/pages
+echo    Under "Source", select "GitHub Actions"
+echo    Click "Save"
 echo.
-echo 2. ⏳ Wait 2-3 minutes for deployment to complete
+echo 2. Wait 2-3 minutes for deployment to complete
 echo.
-echo 3. 🌐 Visit your live web interface:
+echo 3. Visit your live web interface:
 echo    https://zoneshosting.github.io/IDM-VTON-Actions
 echo.
-echo 4. 🎯 Test the complete workflow:
-echo    • Upload or provide image URLs
-echo    • Adjust parameters
-echo    • Click "Run Virtual Try-On"
-echo    • Follow GitHub Actions workflow
-echo    • Download results from artifacts
+echo 4. Test the complete workflow:
+echo    Upload or provide image URLs
+echo    Adjust parameters
+echo    Click "Run Virtual Try-On"
+echo    Follow GitHub Actions workflow
+echo    Download results from artifacts
 echo.
 echo ===============================================
 echo.
@@ -115,7 +108,7 @@ pause > nul
 start https://github.com/zoneshosting/IDM-VTON-Actions
 
 echo.
-echo 📱 Want to open the web interface too? (after 3 minutes)
+echo Want to open the web interface too? (after 3 minutes)
 echo Press any key to open web interface, or close this window to exit...
 pause > nul
 
@@ -123,6 +116,6 @@ pause > nul
 start https://zoneshosting.github.io/IDM-VTON-Actions
 
 echo.
-echo 🎉 Deployment complete! Enjoy your virtual try-on system!
+echo Deployment complete! Enjoy your virtual try-on system!
 echo.
 pause
