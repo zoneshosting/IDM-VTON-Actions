@@ -1,31 +1,766 @@
-                    </li>
-                    </ul>
-                `);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDM-VTON Virtual Try-On - AI Fashion Technology</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .upload-section h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .upload-box {
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .upload-box:hover, .upload-box.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .control-group select, .control-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .run-button {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto;
+            min-width: 250px;
+        }
+
+        .run-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
+        }
+
+        .run-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .progress-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00b894, #00cec9);
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .results-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            display: none;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .results-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .result-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .example-btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .loading {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-tshirt"></i> IDM-VTON Virtual Try-On</h1>
+            <p>AI-Powered Fashion Technology - Try on clothes virtually with advanced AI</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Person Image Section -->
+            <div class="card">
+                <div class="upload-section">
+                    <h3><i class="fas fa-user"></i> Person Image</h3>
+                    <p>Upload a clear, front-facing photo</p>
+                    
+                    <div class="upload-box" id="personUpload">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 10px;"></i>
+                        <br>
+                        <button class="upload-btn" onclick="document.getElementById('personFile').click()">
+                            <i class="fas fa-upload"></i> Choose File
+                        </button>
+                        <input type="file" id="personFile" accept="image/*" style="display: none;">
+                        <div id="personPreview"></div>
+                    </div>
+
+                    <input type="url" 
+                           id="personUrl" 
+                           class="url-input" 
+                           placeholder="Or paste image URL here..."
+                           value="">
+                </div>
+            </div>
+
+            <!-- Garment Image Section -->
+            <div class="card">
+                <div class="upload-section">
+                    <h3><i class="fas fa-tshirt"></i> Garment Image</h3>
+                    <p>Upload a clean product photo</p>
+                    
+                    <div class="upload-box" id="garmentUpload">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #667eea; margin-bottom: 10px;"></i>
+                        <br>
+                        <button class="upload-btn" onclick="document.getElementById('garmentFile').click()">
+                            <i class="fas fa-upload"></i> Choose File
+                        </button>
+                        <input type="file" id="garmentFile" accept="image/*" style="display: none;">
+                        <div id="garmentPreview"></div>
+                    </div>
+
+                    <input type="url" 
+                           id="garmentUrl" 
+                           class="url-input" 
+                           placeholder="Or paste image URL here..."
+                           value="">
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-grid">
+            <div class="control-group">
+                <label for="category"><i class="fas fa-tags"></i> Category:</label>
+                <select id="category">
+                    <option value="upper_body">Upper Body</option>
+                    <option value="lower_body">Lower Body</option>
+                    <option value="dresses">Dresses</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="steps"><i class="fas fa-cog"></i> Inference Steps:</label>
+                <input type="number" id="steps" value="20" min="10" max="50">
+                <small>Higher = better quality, slower</small>
+            </div>
+
+            <div class="control-group">
+                <label for="guidance"><i class="fas fa-adjust"></i> Guidance Scale:</label>
+                <input type="number" id="guidance" value="2.0" min="1.0" max="7.5" step="0.1">
+                <small>How closely to follow garment</small>
+            </div>
+
+            <div class="control-group">
+                <label for="seed"><i class="fas fa-dice"></i> Seed:</label>
+                <input type="number" id="seed" value="42">
+                <small>For reproducible results</small>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="example-btn" onclick="loadExample()">
+                <i class="fas fa-image"></i> Load Example Images
+            </button>
+            
+            <button class="run-button" id="runButton" onclick="runVirtualTryOn()">
+                <i class="fas fa-play"></i> Run Virtual Try-On
+            </button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <h3><i class="fas fa-hourglass-half"></i> Processing Virtual Try-On</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText">Initializing...</div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                Processing takes 15-25 minutes. Results will appear automatically when complete.
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h3><i class="fas fa-images"></i> Virtual Try-On Results</h3>
+            <div id="resultsContent">
+                <div class="results-grid" id="resultsGrid">
+                    <!-- Results will be populated here -->
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="download-btn" onclick="downloadAllResults()">
+                        <i class="fas fa-download"></i> Download All Results
+                    </button>
+                    <button class="run-button" onclick="resetInterface()" style="background: linear-gradient(45deg, #636e72, #2d3436);">
+                        <i class="fas fa-redo"></i> Try Another
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="virtual-tryon-api.js"></script>
+    <script>
+        let currentWorkflowId = null;
+        let enhancedTryOn = null;
+
+        // Initialize the enhanced virtual try-on system
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing Enhanced Virtual Try-On System...');
+            enhancedTryOn = new EnhancedVirtualTryOn();
+            setupFileUploads();
+            setupDragAndDrop();
+        });
+
+        // Load example images
+        function loadExample() {
+            const personUrl = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/human/00013_00.jpg';
+            const garmentUrl = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/cloth/00034_00.jpg';
+            
+            document.getElementById('personUrl').value = personUrl;
+            document.getElementById('garmentUrl').value = garmentUrl;
+            
+            // Load preview images
+            loadImagePreview(personUrl, 'personPreview');
+            loadImagePreview(garmentUrl, 'garmentPreview');
+            
+            showAlert('Example images loaded successfully!', 'success');
+        }
+
+        // Load image preview
+        function loadImagePreview(url, containerId) {
+            const container = document.getElementById(containerId);
+            const img = document.createElement('img');
+            img.src = url;
+            img.className = 'preview-img';
+            img.onload = () => {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+            img.onerror = () => {
+                container.innerHTML = '<p style="color: red;">Failed to load image</p>';
+            };
+        }
+
+        // Setup file uploads
+        function setupFileUploads() {
+            document.getElementById('personFile').addEventListener('change', function(e) {
+                handleFileUpload(e.target.files[0], 'personPreview', 'personUrl');
+            });
+            
+            document.getElementById('garmentFile').addEventListener('change', function(e) {
+                handleFileUpload(e.target.files[0], 'garmentPreview', 'garmentUrl');
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(file, previewId, urlInputId) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-img';
+                document.getElementById(previewId).innerHTML = '';
+                document.getElementById(previewId).appendChild(img);
+                
+                // Note: In a real implementation, you'd upload to a hosting service here
+                // For demo, we'll show instructions
+                showAlert('File selected! Please upload to an image hosting service and paste the URL.', 'info');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            ['personUpload', 'garmentUpload'].forEach(id => {
+                const element = document.getElementById(id);
+                const fileInputId = id.replace('Upload', 'File');
+                const previewId = id.replace('Upload', 'Preview');
+                const urlInputId = id.replace('Upload', 'Url');
+                
+                element.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    element.classList.add('dragover');
+                });
+                
+                element.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    element.classList.remove('dragover');
+                });
+                
+                element.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    element.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        document.getElementById(fileInputId).files = files;
+                        handleFileUpload(files[0], previewId, urlInputId);
+                    }
+                });
+            });
+        }
+
+        // Main function to run virtual try-on
+        async function runVirtualTryOn() {
+            console.log('Starting Virtual Try-On...');
+            
+            // Validate inputs
+            const personUrl = document.getElementById('personUrl').value.trim();
+            const garmentUrl = document.getElementById('garmentUrl').value.trim();
+            
+            if (!personUrl || !garmentUrl) {
+                showAlert('Please provide both person and garment image URLs.', 'error');
                 return;
             }
-
+            
+            if (!isValidUrl(personUrl) || !isValidUrl(garmentUrl)) {
+                showAlert('Please provide valid image URLs.', 'error');
+                return;
+            }
+            
+            // Get parameters
+            const params = {
+                personUrl: personUrl,
+                garmentUrl: garmentUrl,
+                category: document.getElementById('category').value,
+                steps: parseInt(document.getElementById('steps').value),
+                guidance: parseFloat(document.getElementById('guidance').value),
+                seed: parseInt(document.getElementById('seed').value),
+                workflowId: Date.now().toString()
+            };
+            
+            // Update UI
             const runButton = document.getElementById('runButton');
             runButton.disabled = true;
             runButton.innerHTML = '<span class="loading"></span> Processing...';
-
+            
+            // Hide previous results
+            document.getElementById('resultsSection').classList.remove('show');
+            
+            // Show progress
+            document.getElementById('progressSection').classList.add('show');
+            
             try {
-                // Hide any previous results
-                document.getElementById('resultsSection').classList.remove('show');
-                document.getElementById('statusSection').classList.remove('show');
+                // Run the virtual try-on with progress tracking
+                const result = await enhancedTryOn.runVirtualTryOn(params, updateProgress);
                 
-                // Start the simulation
-                await simulateVirtualTryOn();
+                // Show results
+                displayResults(result);
+                showAlert('Virtual try-on completed successfully!', 'success');
                 
             } catch (error) {
-                showStatus('error', `Error during processing: ${error.message}`);
-                document.getElementById('progressSection').classList.remove('show');
+                console.error('Virtual try-on error:', error);
+                showAlert(`Error: ${error.message}`, 'error');
             } finally {
+                // Reset button
                 runButton.disabled = false;
                 runButton.innerHTML = '<i class="fas fa-play"></i> Run Virtual Try-On';
+                
+                // Hide progress
+                setTimeout(() => {
+                    document.getElementById('progressSection').classList.remove('show');
+                }, 1000);
             }
         }
 
-        // Utility function to validate URLs
+        // Update progress display
+        function updateProgress(progress) {
+            const progressFill = document.getElementById('progressFill');
+            const statusText = document.getElementById('statusText');
+            
+            progressFill.style.width = progress.percent + '%';
+            statusText.textContent = progress.text;
+            
+            console.log(`Progress: ${progress.percent}% - ${progress.text}`);
+        }
+
+        // Display results
+        function displayResults(result) {
+            const resultsGrid = document.getElementById('resultsGrid');
+            resultsGrid.innerHTML = '';
+            
+            if (result.results && result.results.length > 0) {
+                result.results.forEach((item, index) => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'result-item';
+                    
+                    resultItem.innerHTML = `
+                        <h4>${item.title}</h4>
+                        <img src="${item.url}" alt="${item.title}" class="result-img" 
+                             onerror="this.src='https://via.placeholder.com/300x400/667eea/white?text=Image+Not+Available'">
+                        <div style="margin-top: 15px;">
+                            <a href="${item.url}" class="download-btn" download="${item.title.replace(/\s+/g, '_')}.jpg">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                            <button class="download-btn" onclick="viewFullSize('${item.url}', '${item.title}')">
+                                <i class="fas fa-expand"></i> View Full
+                            </button>
+                        </div>
+                    `;
+                    
+                    resultsGrid.appendChild(resultItem);
+                });
+                
+                // Show results section
+                document.getElementById('resultsSection').classList.add('show');
+                
+                // Scroll to results
+                document.getElementById('resultsSection').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }
+
+        // View full size image
+        function viewFullSize(url, title) {
+            window.open(url, '_blank');
+        }
+
+        // Download all results
+        function downloadAllResults() {
+            const resultImages = document.querySelectorAll('.result-img');
+            resultImages.forEach((img, index) => {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = `virtual_tryon_result_${index + 1}.jpg`;
+                a.click();
+            });
+        }
+
+        // Reset interface
+        function resetInterface() {
+            // Clear inputs
+            document.getElementById('personUrl').value = '';
+            document.getElementById('garmentUrl').value = '';
+            document.getElementById('personPreview').innerHTML = '';
+            document.getElementById('garmentPreview').innerHTML = '';
+            
+            // Reset parameters to defaults
+            document.getElementById('category').value = 'upper_body';
+            document.getElementById('steps').value = '20';
+            document.getElementById('guidance').value = '2.0';
+            document.getElementById('seed').value = '42';
+            
+            // Hide sections
+            document.getElementById('progressSection').classList.remove('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            
+            // Clear alerts
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => alert.remove());
+            
+            showAlert('Interface reset. Ready for new try-on!', 'info');
+        }
+
+        // Utility functions
         function isValidUrl(string) {
             try {
                 new URL(string);
@@ -35,58 +770,38 @@
             }
         }
 
-        // Setup drag and drop
-        function setupDragAndDrop(uploadBoxId, fileInputId) {
-            const uploadBox = document.getElementById(uploadBoxId);
-            const fileInput = document.getElementById(fileInputId);
-
-            if (uploadBox && fileInput) {
-                uploadBox.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    uploadBox.classList.add('dragover');
-                });
-
-                uploadBox.addEventListener('dragleave', function(e) {
-                    e.preventDefault();
-                    uploadBox.classList.remove('dragover');
-                });
-
-                uploadBox.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    uploadBox.classList.remove('dragover');
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        fileInput.files = files;
-                        fileInput.dispatchEvent(new Event('change'));
+        function showAlert(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${getAlertIcon(type)}"></i> ${message}`;
+            
+            // Insert after header
+            const header = document.querySelector('.header');
+            header.parentNode.insertBefore(alert, header.nextSibling);
+            
+            // Auto-remove after 5 seconds for non-error alerts
+            if (type !== 'error') {
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
                     }
-                });
+                }, 5000);
             }
         }
 
-        // Initialize everything when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, initializing enhanced interface...');
-            
-            // Set up event listeners
-            const exampleBtn = document.getElementById('exampleBtn');
-            const runButton = document.getElementById('runButton');
-            
-            if (exampleBtn) {
-                exampleBtn.addEventListener('click', loadExample);
+        function getAlertIcon(type) {
+            switch (type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-triangle';
+                case 'info': return 'info-circle';
+                default: return 'info-circle';
             }
-            
-            if (runButton) {
-                runButton.addEventListener('click', runVirtualTryOn);
-            }
-
-            // Initialize file uploads
-            setupFileUpload('personFile', 'personPreview', 'personImg', 'personStatus', 'personUpload', 'person');
-            setupFileUpload('garmentFile', 'garmentPreview', 'garmentImg', 'garmentStatus', 'garmentUpload', 'garment');
-            setupDragAndDrop('personUpload', 'personFile');
-            setupDragAndDrop('garmentUpload', 'garmentFile');
-            
-            console.log('Enhanced initialization complete');
-        });
+        }
     </script>
 </body>
 </html>
