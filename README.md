@@ -8,19 +8,33 @@ This repository provides a cloud-based implementation of IDM-VTON (Improving Dif
 
 ## ✨ Features
 
-- 🌐 **Cloud-based processing** - No local installation required
+- 🌐 **Web Interface** - Beautiful, responsive UI at https://zoneshosting.github.io/IDM-VTON-Actions
+- 🌍 **Cloud-based processing** - No local installation required
 - 🆓 **Free to use** - Runs on GitHub's free Action runners
 - 🎯 **Easy to use** - Just provide image URLs and parameters
 - 📱 **Multiple categories** - Upper body, lower body, dresses
 - ⚙️ **Customizable parameters** - Control quality and generation settings
 - 📦 **Automatic results** - Download results as artifacts
 - 🔄 **Reproducible** - Use seeds for consistent results
+- 📱 **Mobile-friendly** - Works perfectly on phones and tablets
+- 🎨 **Modern design** - Intuitive interface with drag-and-drop support
 
 ## 🚀 Quick Start
 
-### 1. Use This Repository
+### 🌐 Option 1: Use the Web Interface (Easiest)
 
-**Option A: Use directly (recommended)**
+**Visit the live web interface:**
+🔗 **https://zoneshosting.github.io/IDM-VTON-Actions**
+
+1. 🖼️ Upload or provide URLs for person and garment images
+2. ⚙️ Adjust parameters (category, quality settings)
+3. 🚀 Click "Run Virtual Try-On" 
+4. 🔄 Follow the GitHub Actions workflow
+5. 📦 Download results from artifacts
+
+### 🔧 Option 2: Use GitHub Actions Directly
+
+**For advanced users:**
 1. ⭐ Star this repository
 2. Go to the **Actions** tab above
 3. Select **IDM-VTON Virtual Try-On**
