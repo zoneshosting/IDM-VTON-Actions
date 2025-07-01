@@ -244,9 +244,16 @@
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
             margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .results-grid.single-result {
+            grid-template-columns: 1fr;
+            max-width: 400px;
+            margin: 20px auto;
         }
 
         .result-item {
@@ -487,7 +494,7 @@
 
         <!-- Results Section -->
         <div class="results-section" id="resultsSection">
-            <h3><i class="fas fa-images"></i> Virtual Try-On Results</h3>
+            <h3><i class="fas fa-magic"></i> Your Virtual Try-On Result</h3>
             <div id="resultsContent">
                 <div class="results-grid" id="resultsGrid">
                     <!-- Results will be populated here -->
@@ -717,6 +724,13 @@
             resultsGrid.innerHTML = '';
             
             if (result.results && result.results.length > 0) {
+                // Add single-result class for better centering when only one result
+                if (result.results.length === 1) {
+                    resultsGrid.classList.add('single-result');
+                } else {
+                    resultsGrid.classList.remove('single-result');
+                }
+                
                 result.results.forEach((item, index) => {
                     const resultItem = document.createElement('div');
                     resultItem.className = 'result-item';
@@ -724,13 +738,13 @@
                     resultItem.innerHTML = `
                         <h4>${item.title}</h4>
                         <img src="${item.url}" alt="${item.title}" class="result-img" 
-                             onerror="this.src='https://via.placeholder.com/300x400/667eea/white?text=Image+Not+Available'">
+                             onerror="this.src='https://via.placeholder.com/400x600/667eea/white?text=Loading+Failed'">
                         <div style="margin-top: 15px;">
-                            <a href="${item.url}" class="download-btn" download="${item.title.replace(/\s+/g, '_')}.jpg">
+                            <a href="${item.url}" class="download-btn" download="virtual_tryon_result.jpg">
                                 <i class="fas fa-download"></i> Download
                             </a>
                             <button class="download-btn" onclick="viewFullSize('${item.url}', '${item.title}')">
-                                <i class="fas fa-expand"></i> View Full
+                                <i class="fas fa-expand"></i> View Full Size
                             </button>
                         </div>
                     `;
