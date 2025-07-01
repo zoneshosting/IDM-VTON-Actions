@@ -512,15 +512,39 @@
         // Initialize the enhanced virtual try-on system
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Initializing Enhanced Virtual Try-On System...');
-            enhancedTryOn = new EnhancedVirtualTryOn();
+            
+            // Wait for virtual-tryon-api.js to load
+            if (typeof EnhancedVirtualTryOn !== 'undefined') {
+                enhancedTryOn = new EnhancedVirtualTryOn();
+                console.log('EnhancedVirtualTryOn initialized successfully');
+            } else {
+                console.error('EnhancedVirtualTryOn class not found. Retrying...');
+                // Retry after a short delay
+                setTimeout(() => {
+                    if (typeof EnhancedVirtualTryOn !== 'undefined') {
+                        enhancedTryOn = new EnhancedVirtualTryOn();
+                        console.log('EnhancedVirtualTryOn initialized successfully (retry)');
+                    } else {
+                        console.error('Failed to load EnhancedVirtualTryOn. Using fallback.');
+                        // Create a minimal fallback
+                        enhancedTryOn = {
+                            runVirtualTryOn: async function(params, progressCallback) {
+                                throw new Error('Virtual try-on API not loaded. Please refresh the page.');
+                            }
+                        };
+                    }
+                }, 1000);
+            }
+            
             setupFileUploads();
             setupDragAndDrop();
         });
 
         // Load example images
         function loadExample() {
-            const personUrl = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/human/00013_00.jpg';
-            const garmentUrl = 'https://raw.githubusercontent.com/yisol/IDM-VTON/main/example/cloth/00034_00.jpg';
+            // Using accessible demo images
+            const personUrl = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=600&fit=crop&crop=face';
+            const garmentUrl = 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop';
             
             document.getElementById('personUrl').value = personUrl;
             document.getElementById('garmentUrl').value = garmentUrl;
@@ -610,6 +634,12 @@
         // Main function to run virtual try-on
         async function runVirtualTryOn() {
             console.log('Starting Virtual Try-On...');
+            
+            // Check if enhancedTryOn is loaded
+            if (!enhancedTryOn) {
+                showAlert('System not ready. Please refresh the page and try again.', 'error');
+                return;
+            }
             
             // Validate inputs
             const personUrl = document.getElementById('personUrl').value.trim();
