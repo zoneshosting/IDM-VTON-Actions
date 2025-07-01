@@ -1,0 +1,100 @@
+name: Bug Report
+description: Report a bug or issue with the virtual try-on workflow
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the sections below.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of what the bug is
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: What should have happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Go to Actions tab
+        2. Click on workflow
+        3. Enter parameters: ...
+        4. See error
+    validations:
+      required: true
+
+  - type: input
+    id: workflow-url
+    attributes:
+      label: Workflow Run URL
+      description: Link to the failed workflow run
+      placeholder: https://github.com/username/repo/actions/runs/123456789
+    validations:
+      required: false
+
+  - type: textarea
+    id: parameters
+    attributes:
+      label: Parameters Used
+      description: What parameters did you use?
+      placeholder: |
+        Person Image URL: https://...
+        Garment Image URL: https://...
+        Category: upper_body
+        Steps: 20
+        Guidance: 2.0
+        Seed: 42
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Messages/Logs
+      description: Copy and paste any relevant error messages
+      render: shell
+    validations:
+      required: false
+
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: Browser
+      description: What browser are you using?
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Other
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have read the troubleshooting guide
+          required: true
+        - label: I have tested with the example images
+          required: false
+        - label: I have checked for existing issues
+          required: true
