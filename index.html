@@ -511,7 +511,7 @@
         </div>
     </div>
 
-    <script src="idm-vton-api.js"></script>
+    <script src="github-actions-api.js"></script>
     <script>
         let currentWorkflowId = null;
         let enhancedTryOn = null;
@@ -661,16 +661,14 @@
             const garmentUrl = document.getElementById('garmentUrl').value.trim();
             
             // Check if we have files or URLs
-            const status = enhancedTryOn.getStatus();
-            const hasPersonInput = status.hasPersonFile || (personUrl && isValidUrl(personUrl));
-            const hasGarmentInput = status.hasGarmentFile || (garmentUrl && isValidUrl(garmentUrl));
+            const validation = enhancedTryOn.hasValidInputs(personUrl, garmentUrl);
             
-            if (!hasPersonInput) {
+            if (!validation.hasPersonInput) {
                 showAlert('Please upload a person image or provide a valid URL.', 'error');
                 return;
             }
             
-            if (!hasGarmentInput) {
+            if (!validation.hasGarmentInput) {
                 showAlert('Please upload a garment image or provide a valid URL.', 'error');
                 return;
             }

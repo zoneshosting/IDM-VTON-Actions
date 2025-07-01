@@ -1,0 +1,210 @@
+name: IDM-VTON Processing with Hugging Face API
+
+on:
+  repository_dispatch:
+    types: [process-virtual-tryon]
+  workflow_dispatch:
+    inputs:
+      person_image_data:
+        description: 'Base64 encoded person image'
+        required: true
+      garment_image_data:
+        description: 'Base64 encoded garment image'
+        required: true
+      garment_description:
+        description: 'Description of the garment'
+        default: 'A stylish garment for virtual try-on'
+      denoise_steps:
+        description: 'Number of denoising steps'
+        default: '30'
+      seed:
+        description: 'Random seed'
+        default: '42'
+      session_id:
+        description: 'Session ID for tracking'
+        required: true
+
+env:
+  HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+
+jobs:
+  process-virtual-tryon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        pip install gradio_client requests pillow base64 json
+    
+    - name: Create processing directories
+      run: |
+        mkdir -p inputs outputs temp
+    
+    - name: Process Virtual Try-On with Hugging Face API
+      id: process
+      run: |
+        python3 << 'EOF'
+        import os
+        import json
+        import base64
+        import requests
+        from datetime import datetime
+        from gradio_client import Client, file
+        import tempfile
+        
+        def base64_to_file(base64_data, filename):
+            """Convert base64 data to temporary file"""
+            # Remove data URL prefix if present
+            if ',' in base64_data:
+                base64_data = base64_data.split(',')[1]
+            
+            # Decode base64
+            image_data = base64.b64decode(base64_data)
+            
+            # Write to temporary file
+            filepath = f"temp/{filename}"
+            with open(filepath, 'wb') as f:
+                f.write(image_data)
+            
+            return filepath
+        
+        def process_virtual_tryon():
+            try:
+                # Get parameters from GitHub Actions inputs
+                person_data = "${{ github.event.inputs.person_image_data || github.event.client_payload.person_image_data }}"
+                garment_data = "${{ github.event.inputs.garment_image_data || github.event.client_payload.garment_image_data }}"
+                garment_desc = "${{ github.event.inputs.garment_description || github.event.client_payload.garment_description || 'A stylish garment for virtual try-on' }}"
+                denoise_steps = int("${{ github.event.inputs.denoise_steps || github.event.client_payload.denoise_steps || '30' }}")
+                seed = int("${{ github.event.inputs.seed || github.event.client_payload.seed || '42' }}")
+                session_id = "${{ github.event.inputs.session_id || github.event.client_payload.session_id || 'default' }}"
+                
+                print(f"Processing virtual try-on for session: {session_id}")
+                
+                # Convert base64 images to files
+                person_file = base64_to_file(person_data, "person.jpg")
+                garment_file = base64_to_file(garment_data, "garment.jpg")
+                
+                print(f"Person image saved to: {person_file}")
+                print(f"Garment image saved to: {garment_file}")
+                
+                # Initialize Hugging Face client with authentication
+                hf_token = os.getenv('HUGGINGFACE_TOKEN')
+                
+                if hf_token:
+                    print("Using authenticated Hugging Face token")
+                    client = Client("yisol/IDM-VTON", hf_token=hf_token)
+                else:
+                    print("No HF token found, using public access")
+                    client = Client("yisol/IDM-VTON")
+                
+                # Prepare API call parameters
+                result = client.predict(
+                    dict={
+                        "background": file(person_file),
+                        "layers": [],
+                        "composite": None
+                    },
+                    garm_img=file(garment_file),
+                    garment_des=garment_desc,
+                    is_checked=True,  # Auto-masking
+                    is_checked_crop=False,  # No cropping
+                    denoise_steps=denoise_steps,
+                    seed=seed,
+                    api_name="/tryon"
+                )
+                
+                print("✅ IDM-VTON API call successful")
+                print(f"Result type: {type(result)}")
+                print(f"Result length: {len(result) if hasattr(result, '__len__') else 'N/A'}")
+                
+                # Save results
+                if result and len(result) >= 2:
+                    output_image_path = result[0]
+                    masked_image_path = result[1]
+                    
+                    # Copy results to outputs directory
+                    import shutil
+                    final_output = f"outputs/virtual_tryon_result_{session_id}.jpg"
+                    shutil.copy2(output_image_path, final_output)
+                    
+                    if masked_image_path:
+                        final_masked = f"outputs/masked_result_{session_id}.jpg"
+                        shutil.copy2(masked_image_path, final_masked)
+                    
+                    # Create metadata
+                    metadata = {
+                        "timestamp": datetime.now().isoformat(),
+                        "session_id": session_id,
+                        "parameters": {
+                            "garment_description": garment_desc,
+                            "denoise_steps": denoise_steps,
+                            "seed": seed
+                        },
+                        "status": "success",
+                        "output_files": [final_output, final_masked] if masked_image_path else [final_output]
+                    }
+                    
+                    with open(f'outputs/metadata_{session_id}.json', 'w') as f:
+                        json.dump(metadata, f, indent=2)
+                    
+                    print(f"✅ Results saved to: {final_output}")
+                    return True
+                    
+                else:
+                    print("❌ Invalid API response")
+                    return False
+                    
+            except Exception as e:
+                print(f"❌ Error processing virtual try-on: {str(e)}")
+                
+                # Create error metadata
+                metadata = {
+                    "timestamp": datetime.now().isoformat(),
+                    "session_id": session_id,
+                    "status": "error",
+                    "error": str(e)
+                }
+                
+                with open(f'outputs/error_{session_id}.json', 'w') as f:
+                    json.dump(metadata, f, indent=2)
+                
+                return False
+        
+        # Run the processing
+        success = process_virtual_tryon()
+        print(f"::set-output name=status::{'success' if success else 'failed'}")
+        EOF
+    
+    - name: Upload results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: virtual-tryon-results-${{ github.event.inputs.session_id || github.event.client_payload.session_id || github.run_id }}
+        path: outputs/
+        retention-days: 7
+    
+    - name: Create status summary
+      if: always()
+      run: |
+        echo "## Virtual Try-On Processing Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Session ID:** ${{ github.event.inputs.session_id || github.event.client_payload.session_id || github.run_id }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Status:** ${{ steps.process.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Timestamp:** $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.process.outputs.status }}" = "success" ]; then
+          echo "✅ Virtual try-on completed successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "Check the artifacts section below to download your results." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Virtual try-on processing failed." >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs above for error details." >> $GITHUB_STEP_SUMMARY
+        fi
