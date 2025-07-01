@@ -511,7 +511,7 @@
         </div>
     </div>
 
-    <script src="virtual-tryon-api.js"></script>
+    <script src="idm-vton-api.js"></script>
     <script>
         let currentWorkflowId = null;
         let enhancedTryOn = null;
@@ -581,17 +581,22 @@
         // Setup file uploads
         function setupFileUploads() {
             document.getElementById('personFile').addEventListener('change', function(e) {
-                handleFileUpload(e.target.files[0], 'personPreview', 'personUrl');
+                handleFileUpload(e.target.files[0], 'personPreview', 'personUrl', 'person');
             });
             
             document.getElementById('garmentFile').addEventListener('change', function(e) {
-                handleFileUpload(e.target.files[0], 'garmentPreview', 'garmentUrl');
+                handleFileUpload(e.target.files[0], 'garmentPreview', 'garmentUrl', 'garment');
             });
         }
 
         // Handle file upload
-        function handleFileUpload(file, previewId, urlInputId) {
+        function handleFileUpload(file, previewId, urlInputId, fileType) {
             if (!file) return;
+            
+            // Store the uploaded file in the enhanced try-on system
+            if (enhancedTryOn) {
+                enhancedTryOn.setUploadedFile(fileType, file);
+            }
             
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -601,9 +606,11 @@
                 document.getElementById(previewId).innerHTML = '';
                 document.getElementById(previewId).appendChild(img);
                 
-                // Note: In a real implementation, you'd upload to a hosting service here
-                // For demo, we'll show instructions
-                showAlert('File selected! Please upload to an image hosting service and paste the URL.', 'info');
+                // Clear the URL input since we're using the uploaded file
+                document.getElementById(urlInputId).value = '';
+                document.getElementById(urlInputId).placeholder = `✓ ${file.name} uploaded - or paste URL to override`;
+                
+                showAlert(`${fileType} image uploaded successfully! You can run virtual try-on now.`, 'success');
             };
             reader.readAsDataURL(file);
         }
@@ -615,6 +622,7 @@
                 const fileInputId = id.replace('Upload', 'File');
                 const previewId = id.replace('Upload', 'Preview');
                 const urlInputId = id.replace('Upload', 'Url');
+                const fileType = id.replace('Upload', '').toLowerCase();
                 
                 element.addEventListener('dragover', function(e) {
                     e.preventDefault();
@@ -632,7 +640,7 @@
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
                         document.getElementById(fileInputId).files = files;
-                        handleFileUpload(files[0], previewId, urlInputId);
+                        handleFileUpload(files[0], previewId, urlInputId, fileType);
                     }
                 });
             });
@@ -648,17 +656,22 @@
                 return;
             }
             
-            // Validate inputs
+            // Get input values
             const personUrl = document.getElementById('personUrl').value.trim();
             const garmentUrl = document.getElementById('garmentUrl').value.trim();
             
-            if (!personUrl || !garmentUrl) {
-                showAlert('Please provide both person and garment image URLs.', 'error');
+            // Check if we have files or URLs
+            const status = enhancedTryOn.getStatus();
+            const hasPersonInput = status.hasPersonFile || (personUrl && isValidUrl(personUrl));
+            const hasGarmentInput = status.hasGarmentFile || (garmentUrl && isValidUrl(garmentUrl));
+            
+            if (!hasPersonInput) {
+                showAlert('Please upload a person image or provide a valid URL.', 'error');
                 return;
             }
             
-            if (!isValidUrl(personUrl) || !isValidUrl(garmentUrl)) {
-                showAlert('Please provide valid image URLs.', 'error');
+            if (!hasGarmentInput) {
+                showAlert('Please upload a garment image or provide a valid URL.', 'error');
                 return;
             }
             
@@ -786,6 +799,17 @@
             document.getElementById('garmentUrl').value = '';
             document.getElementById('personPreview').innerHTML = '';
             document.getElementById('garmentPreview').innerHTML = '';
+            
+            // Reset placeholders
+            document.getElementById('personUrl').placeholder = 'Or paste image URL here...';
+            document.getElementById('garmentUrl').placeholder = 'Or paste image URL here...';
+            
+            // Clear uploaded files
+            document.getElementById('personFile').value = '';
+            document.getElementById('garmentFile').value = '';
+            if (enhancedTryOn) {
+                enhancedTryOn.clearUploadedFiles();
+            }
             
             // Reset parameters to defaults
             document.getElementById('category').value = 'upper_body';
