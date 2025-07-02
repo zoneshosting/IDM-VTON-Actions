@@ -533,10 +533,45 @@
                         console.log('EnhancedVirtualTryOn initialized successfully (retry)');
                     } else {
                         console.error('Failed to load EnhancedVirtualTryOn. Using fallback.');
-                        // Create a minimal fallback
+                        // Create a proper fallback
                         enhancedTryOn = {
+                            uploadedFiles: { person: null, garment: null },
+                            setUploadedFile: function(type, file) {
+                                this.uploadedFiles[type] = file;
+                                console.log(`${type} file uploaded (fallback):`, file.name);
+                            },
+                            hasValidInputs: function(personUrl, garmentUrl) {
+                                const hasPersonInput = this.uploadedFiles.person || (personUrl && isValidUrl(personUrl));
+                                const hasGarmentInput = this.uploadedFiles.garment || (garmentUrl && isValidUrl(garmentUrl));
+                                return { hasPersonInput, hasGarmentInput };
+                            },
+                            clearUploadedFiles: function() {
+                                this.uploadedFiles = { person: null, garment: null };
+                            },
                             runVirtualTryOn: async function(params, progressCallback) {
-                                throw new Error('Virtual try-on API not loaded. Please refresh the page.');
+                                progressCallback({ percent: 10, text: 'Opening Hugging Face Space...', status: 'running' });
+                                
+                                // Open Hugging Face Space
+                                const hfSpaceUrl = 'https://huggingface.co/spaces/yisol/IDM-VTON';
+                                window.open(hfSpaceUrl, '_blank');
+                                
+                                progressCallback({ percent: 50, text: 'Hugging Face Space opened in new tab', status: 'running' });
+                                
+                                // Show demo result
+                                progressCallback({ percent: 100, text: 'Use the opened Space for real processing', status: 'success' });
+                                
+                                return {
+                                    status: 'success',
+                                    results: [{
+                                        title: 'Demo Result - Use Hugging Face Space for Real Processing',
+                                        url: `https://picsum.photos/seed/${params.seed || 42}/512/768`,
+                                        type: 'demo'
+                                    }],
+                                    metadata: {
+                                        processing: 'Fallback - HF Space Opened',
+                                        timestamp: new Date().toISOString()
+                                    }
+                                };
                             }
                         };
                     }
@@ -706,6 +741,8 @@
                     showAlert('Hugging Face Space opened! Follow the instructions to process with real IDM-VTON.', 'info');
                 } else if (result.metadata && result.metadata.processing === 'Demo Preview') {
                     showAlert('Demo preview shown. For real results, use the Hugging Face Space directly.', 'info');
+                } else if (result.metadata && result.metadata.processing === 'Fallback - HF Space Opened') {
+                    showAlert('Hugging Face Space opened in new tab! Upload your images there for real IDM-VTON processing.', 'info');
                 } else {
                     showAlert('Virtual try-on completed!', 'success');
                 }
